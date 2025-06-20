@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>กระแหร่ง Food & Bakery</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background-color: #fff;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.03);
+    }
+    .ig-style {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .ig-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="max-w-5xl mx-auto p-4">
+    <h1 class="text-4xl font-bold text-pink-500 text-center mb-6">กระแหร่ง Food & Bakery 🍴</h1>
+    <div id="menu" class="ig-style"></div>
+
+    <div class="text-right text-lg font-semibold text-pink-600 mt-6">
+      ราคารวม: <span id="totalDisplay">0</span> บาท
+    </div>
+
+    <form id="orderForm" class="mt-4 bg-white p-6 rounded-lg shadow">
+      <h2 class="text-2xl font-semibold mb-4 text-gray-700">📝 ข้อมูลลูกค้า</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <input name="firstName" placeholder="ชื่อ" class="p-3 border rounded" required>
+        <input name="lastName" placeholder="นามสกุล" class="p-3 border rounded" required>
+        <input name="phone" placeholder="เบอร์โทร" class="p-3 border rounded" required>
+      </div>
+      <input type="hidden" name="order" id="orderField">
+      <input type="hidden" name="total" id="totalField">
+      <button type="submit" class="w-full bg-pink-500 text-white py-2 rounded mt-4">ส่งคำสั่งซื้อ</button>
+    </form>
+  </div>
+
+  <script>
+    const menuItems = [
+      { id: 1, name: 'กระเพราหมูกรอบ', price: 60, image: 'https://i.postimg.cc/rFzmgKrT/image.jpg', type: 'food' },
+      { id: 2, name: 'ผัดไทยกุ้งสด', price: 50, image: 'https://i.postimg.cc/qMXTsrmr/image.jpg', type: 'food' },
+      { id: 3, name: 'ข้าวหมูทอด', price: 55, image: 'https://i.postimg.cc/NG2GrWqG/image.jpg', type: 'food' },
+      { id: 4, name: 'ข้าวผัดกุ้ง', price: 65, image: 'https://i.postimg.cc/k4tCKmbQ/image.jpg', type: 'food' },
+      { id: 5, name: 'สุกี้ทะเล', price: 70, image: 'https://i.postimg.cc/0yWhnyDT/image.jpg', type: 'food' },
+      { id: 6, name: 'ชาเขียวเย็น', price: 30, image: 'https://i.postimg.cc/nhPw7wtZ/image.jpg', type: 'drink' },
+      { id: 7, name: 'โค้ก', price: 25, image: 'https://i.postimg.cc/C5SvY3bC/coke.webp', type: 'drink' },
+      { id: 8, name: 'น้ำเปล่า', price: 15, image: 'https://i.postimg.cc/RF6RmM3n/crystal.jpg', type: 'drink' }
+    ];
+
+    const menuContainer = document.getElementById('menu');
+    const totalDisplay = document.getElementById('totalDisplay');
+    const orderList = [];
+
+    function updateTotal() {
+      const total = orderList.reduce((sum, i) => sum + i.price, 0);
+      totalDisplay.textContent = total;
+    }
+
+    menuItems.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${item.image}" class="ig-img" alt="${item.name}" />
+        <div class="p-3">
+          <h3 class="font-semibold text-gray-800">${item.name}</h3>
+          <p class="text-sm text-gray-500">฿${item.price}</p>
+          <button class="mt-2 w-full bg-pink-400 text-white py-1 rounded addBtn">+ เพิ่ม</button>
+        </div>
+      `;
+      card.querySelector('button').addEventListener('click', () => {
+        orderList.push(item);
+        updateTotal();
+        alert(`เพิ่มเมนู: ${item.name}`);
+      });
+      menuContainer.appendChild(card);
+    });
+
+    document.getElementById('orderForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const form = e.target;
+      const orderNames = orderList.map(i => i.name).join(', ');
+      const total = orderList.reduce((sum, i) => sum + i.price, 0);
+      form.order.value = orderNames;
+      form.total.value = total;
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      await fetch('https://script.google.com/macros/s/AKfycbyTo9ocV59kunGeYUbJnFEX_bNJxouQZdaF1nxNoYWskzDQ3kYYRKTVZa72iFxTMk_E/exec', {
+        method: 'POST',
+        body: new URLSearchParams(data)
+      });
+
+      alert('ส่งข้อมูลเรียบร้อยแล้ว!');
+      form.reset();
+      orderList.length = 0;
+      updateTotal();
+    });
+  </script>
+</body>
+</html>
